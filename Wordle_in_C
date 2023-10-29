@@ -1,0 +1,166 @@
+// C program for a game of wordle with forfeit option
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
+
+#define wl_size 100
+#define word_len 5
+#define max 6
+
+// Choosing a random word from a list
+char* randomword() {
+    const char* wl[wl_size] = {"flesh", "peace", "start", "water", "major", "money", "party", "queen", "share", "squid","stump","crude","argon","pixel","flour","dwell","bowel","prowl","ideal","oasis","rainy","unbox","vague","short","ivory","squid", "tribe", "unite", "viper", "waltz","zesty", "auburn", "bison", "chime","juice", "kiosk", "lemon", "mural", "nylon","apple","olive", "peach", "quick", "raven", "sight", "toast","beach", "chair", "dance", "eagle", "fairy", "grape", "happy", "image", "jeans", "knife", "lemon", "magic", "noise", "ocean", "puppy", "quiet", "river", "snake", "tiger", "uncle", "value", "watch", "young", "zebra", "amber", "blaze", "cloud", "diary", "elbow","flame","glove","heart","opera","piano","quiet","young","mango","night","aroma","vixen","salsa","tango","under","barge","crisp","disco","ember","flint","glaze","hobby","resin","eagle","fable","laser"};
+
+    int random_mark = rand() % wl_size;
+    char* chosen_word = (char*)malloc(word_len + 1); // Allocate memory for the selected word
+    strcpy(chosen_word, wl[random_mark]); // Copy the selected word
+    return chosen_word;
+}
+
+// Checking if the guessed word matches the answer
+int check(const char* word, const char* target) {
+    return (strcmp(word, target) == 0);
+}
+
+// Providing feedback on the guessed word
+void provideFeedback(const char* guess, const char* ans) {
+    int i, j;
+    int right_place = 0;
+    int right_letter = 0;
+    int wrong_letter = 0;
+    char ans_copy[word_len + 1];
+    char guess_copy[word_len + 1];
+
+    strcpy(ans_copy, ans);
+    strcpy(guess_copy, guess);
+
+    printf("\n====================================\n");
+    printf("       F  E  E  D  B  A  C  K    \n");
+    printf("====================================\n\n");
+    
+    for (i = 0; i < word_len; i++) {
+        if (guess_copy[i] == ans_copy[i]) {
+            right_place++;
+            printf("%c: Right letter in the right position\n", guess_copy[i]);
+            guess_copy[i] = ans_copy[i] = '0'; // Mark as used
+        }
+    }
+
+    for (i = 0; i < word_len; i++) {
+        for (j = 0; j < word_len; j++) {
+            if (guess_copy[i] == ans_copy[j] && guess_copy[i] != '0') {
+                right_letter++;
+                printf("%c: Right letter in the wrong position\n", guess_copy[i]);
+                // Marking both as used
+                guess_copy[i] = '0'; 
+                ans_copy[j] = '0'; 
+            }
+        }
+    }
+
+    wrong_letter = word_len - right_place - right_letter;
+    printf("No. of wrong letters: %d\n", wrong_letter);
+}
+
+int main() {
+    int choice;
+    int choice2;
+    srand(time(NULL));
+    char* ans = randomword();
+    char guess[word_len + 1];
+    int attempts = 0;
+
+    printf("===========================================================\n");
+    printf("                  W   O   R   D   L   E    \n");
+    printf("===========================================================\n\n");
+    printf("Welcome!\n\n\n");
+    printf("1. Play the game\n\n");
+    printf("2. Help\n\n");
+    printf("Enter your choice: ");
+    scanf("%d", &choice);
+
+    if (choice == 2) {
+        printf("\n Instructions:\n\n");
+        printf("1. You have %d attempts to guess the 5-letter word.\n\n", max);
+        printf("2. After each guess, you'll receive feedback on your word.\n\n");
+        printf("3. Feedback: \n");
+        printf("\t(i) Right letters in right positions are shown as ~Right letter in the right position~\n");
+        printf("\t(ii) Right letters in wrong positions are shown as ~Right letter in the wrong position~\n");
+        printf("\t(iii) Wrong letters are shown as ~Wrong letter~\n");
+        printf("\n You can also forfeit the game by typing in ~forfeit~\n\n");
+        printf("\nGood luck!\n\n");
+        printf("Choose again: \n\n");
+        printf("1. Play the game\n\n");
+        printf("2. Exit\n\n");
+        printf("Enter your choice: ");
+        scanf("%d", &choice2);
+
+        if (choice2 == 1) {
+            printf("\nPlease guess the 5-letter word.\n\n");
+
+            while (attempts < max) {
+                printf("\nAttempt %d of %d: ", attempts + 1, max);
+                scanf("%s", guess);
+
+                if (check(guess, ans)) {
+                    printf("Congratulations, you got it right!\n");
+                    printf("The answer is %s\n", ans);
+                    break;
+                } else if (strcmp(guess, "forfeit") == 0) {
+                    // If the players chooses to forfeit the game
+                    printf("\n\nYou forfeited");
+					printf("\nThe word was: %s\n", ans);
+					printf("\nBetter luck next time!\n");
+                    break;
+                } else {
+                    provideFeedback(guess, ans);
+                    attempts++;
+                }
+            }
+
+            if (attempts == max) {
+                printf("Out of attempts. The word was: %s\n", ans);
+            }
+			
+			// Freeing the memory allocated for the answer
+            free(ans); 
+        } else if (choice2 != 2) {
+            printf("Invalid choice. Please choose either 1 or 2\n");
+            return 0;
+        }
+    } else if (choice != 1) {
+        printf("Invalid choice. Please choose either 1 or 2\n");
+        return 1;
+    } else if (choice == 1) {
+        printf("\nPlease guess the 5-letter word\n\n");
+
+        while (attempts < max) {
+            printf("\nAttempt %d of %d: ", attempts + 1, max);
+            scanf("%s", guess);
+
+            if (check(guess, ans)) {
+                printf("Congratulations, you got it right!\n");
+                printf("The answer is %s\n", ans);
+                break;
+            } else if (strcmp(guess, "forfeit") == 0) {
+                // If the player chooses to forfeit the game
+                printf("\n\nYou forfeited");
+					printf("\n\nThe word was: %s\n", ans);
+					printf("\nBetter luck next time!\n");
+                break;
+            } else {
+                provideFeedback(guess, ans);
+                attempts++;
+            }
+        }
+
+        if (attempts == max) {
+            printf("Out of attempts. The word was: %s\n", ans);
+        }
+		// Freeing the memory allocated for the answer
+        free(ans); 
+    }
+
+    return 0;
+}
